@@ -1,0 +1,1357 @@
+COSA
+192.168.1.25 - /ITIM/ansible/
+http://192.168.1.25/ITIM/ansible/installapache2.yml
+---
+- name: Install apache2 on Debian
+  hosts: webservers
+  become: yes
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Install apache2
+      ansible.builtin.apt:
+        name: apache2
+        state: present
+
+    - name: Ensure apache2 is running
+      ansible.builtin.service:
+        name: apache2
+        state: started
+        enabled: yes
+
+
+http://192.168.1.25/ITIM/ansible/inventory.ini
+
+[webservers]
+managed_node ansible_host=192.168.100.101 ansible_user=star
+
+
+http://192.168.1.25/ITIM/ansible/utf_error.txt
+
+sudo nano /etc/default/locale
+
+
+LANG="     .UTF-8"
+LC_ALL="      .UTF-8"
+
+sudo locale-gen en_In.UTF-8
+sudo update-locale
+
+Reboot
+Ansible-playbook -i  inventory.ini instllapache2.yml
+ansible 
+
+
+
+
+http://192.168.1.25/ITIM/Docker_DockerSwarm.txt
+
+What is Docker?
+	Docker is an open platform for developing, shipping and running applications.
+
+	Docker enables you to separate your applications from your infra so you can deliver software quickly. 
+	
+	With docker, you can manage your infra in the same way as you manage your applications. 
+	
+	By taking advantage of Docker's methodologies for shipping, testing and deploying code quickly, you can significantly reduce the delay between writing code and running it in production.
+	
+Docker Platform
+	- Docker provides the abilitiy to package and run an application in a loosely isolated environment called a container.
+	
+	- The isolation and security allows you to run many containers simultaneously on a given host. 
+	
+	- Containers are lightweight and contain everything needed to run the application, so you don't need to rely on what is currently installed on the host.
+	
+	- You can easily share containers while you work, and be sure that everyone you share with gets the same container that works in the same way.
+	
+Docker provides tooling and a platform to manage the lifecycle of your contianers.
+	
+	- Develop your application and its supporting components using containers.
+	
+	- The container becomes the unit for distributing and testing your application. 
+	
+	- When you're ready, deploy your application into your production environment, as a container or an orchestrated service.
+	
+	- This works the same whether your production environment is local data center, a cloud provider or hybrid of two.
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+Docker Swarm
+	- Docker Swarm is a container orchestration tool, meaning that it allows the user to manage multiple containers deployed across multiple host machines.
+	
+	- One of the key benifits associated with the operation of a docker swarm is the high level of availability offered for applications.
+	
+	- Docker Swarm is an open-source container orchestration platform built and maintained by Docker. Under the hood, Docker Swarm converts multiple Docker instance into a single virtual host. A Docker Swarm cluster generally contains three items.
+		Nodes
+		Services and Tasks
+		Load Balancers
+
+Nodes are individual instances of the Docker Engine that control your cluster and manage the containers used to run your services and tasks. 
+
+Docker Swarm cluster also includes load balancing route requests across nodes.
+*************************************************************************************************************
+
+
+http://192.168.1.25/ITIM/docker_setup.txt
+
+echo "Let's Build Docker Image"
+sleep 15
+docker build -t acharyaditiss/dhadkan .
+docker login -u acharyaditiss -p $password
+docker push acharyaditiss/dhadkan
+sleep 60
+ssh admin@172.31.36.107 "docker ps -a | grep 'mycontainer' && docker stop 'mycontainer' && docker rm 'mycontainer'"
+ssh admin@172.31.36.107 "docker pull acharyaditiss/dhadkan:latest && docker run --name 'mycontainer' -d -p 80:80 acharyaditiss/dhadkan"
+*************************************************************************************************************
+
+
+
+
+
+http://192.168.1.25/ITIM/git.txt
+
+mkdir project
+cd project
+
+ssh-keygen
+public key -> copy -> Github -> settings- > deploy key -> ssh => write permission tick....
+
+
+GIT CONFIG------
+=================
+git init                                           Initialization
+git config user.email "EMAIL"				to config user email
+git config user.name "username"				to config user name
+
+git remote add origin "SSH"				to add shortname for remote repo
+
+#IF YOU BY MISTAKE ADD THE FALSE ORIGIN"
+############### git remote remove origin ((IF you want to remove the already added origin) ######## 
+
+
+
+echo "Hello" | tee index.html
+
+git status						To know the status
+	
+git add .						to add the files into the staging area
+
+git commit -m "MESSAGE"					to commit the changes.
+
+git push origin master					push it to remote repo.
+*************************************************************************************************************
+
+
+
+
+
+
+
+
+
+
+
+http://192.168.1.25/ITIM/jenkins.txt
+
+#!/bin/bash
+
+sudo apt update
+sudo apt upgrade -y
+sudo apt install fontconfig git default-jre -y
+sudo wget -O /usr/share/keyrings/jenkins-keyring.asc \
+  https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc]" \
+  https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
+  /etc/apt/sources.list.d/jenkins.list > /dev/null
+sudo apt-get update
+sudo apt-get install jenkins -y
+systemctl is-active jenkins
+
+
+http://192.168.1.25/ITIM/Syllabus_Covered.txt
+
+Session - 8
+Session  - 10
+Session - 19 [EC2]
+
+Session - 9 [Task Assigned - TrueNAS]
+
+
+
+192.168.1.25 - /ITIM/terraform/
+
+http://192.168.1.25/ITIM/terraform/main.tf.txt
+provider "aws" {
+  region = var.region
+}
+
+resource "aws_instance" "debian_ec2" {
+  ami                    = var.ami_id
+  instance_type          = var.instance_type
+  key_name               = var.key_name
+  associate_public_ip_address = true
+  vpc_security_group_ids = [aws_security_group.allow_ssh.id]
+
+  tags = {
+    Name = "Debian-Terraform-EC2"
+  }
+}
+
+resource "aws_security_group" "allow_ssh" {
+  name        = "allow_ssh"
+  description = "Allow SSH inbound traffic"
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]  # Use your IP/CIDR for better security
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+
+
+http://192.168.1.25/ITIM/terraform/output.tf.txt
+# output.tf
+
+output "instance_ip" {
+  value = aws_instance.debian_ec2.public_ip
+  description = "The public IP address of the instance"
+}
+
+output "instance_id" {
+  value = aws_instance.debian_ec2.id
+  description = "The ID of the instance"
+}
+
+
+
+
+
+
+
+ITIM/TERRAFORM/TERRAFORM.SH
+
+#!/bin/bash
+sudo apt install wget -y
+sudo apt-get update && sudo apt-get install -y wget gnupg software-properties-common
+
+wget -O- https://apt.releases.hashicorp.com/gpg | \
+gpg --dearmor | \
+sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg > /dev/null
+
+
+gpg --no-default-keyring \
+--keyring /usr/share/keyrings/hashicorp-archive-keyring.gpg \
+--fingerprint
+
+echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] \
+https://apt.releases.hashicorp.com $(lsb_release -cs) main" | \
+sudo tee /etc/apt/sources.list.d/hashicorp.list
+
+
+sudo apt update
+
+sudo apt-get install terraform -y
+
+
+sudo apt install -y awscli
+aws --version
+
+
+
+
+
+
+http://192.168.1.25/ITIM/terraform/Terraform_README.txt
+execute terraform.sh
+
+AWS ACCESS_KEY GENERATE
+
+
+aws configure
+
+	key - ID
+	key - secret
+	Default Region - us-east-1
+	output - json
+
+mkdir terra & cd terra
+
+create these files.....
+
+main.tf
+variables.tf
+outputs.tf
+
+
+Go to EC2 generate keypair copy the keypair. ..!
+copy to your Debian machine. ......  
+		~/.ssh/demo
+
+chmod 400 demo
+
+terraform init
+terraform plan
+terraform apply
+
+
+
+
+
+http://192.168.1.25/ITIM/terraform/variables.tf.txt
+
+variable "region" {
+  default = "us-east-1"
+}
+
+variable "ami_id" {
+  description = "Debian 12 AMI ID"
+  default     = "ami-0779caf41f9ba54f0"  # Debian 12 (Bookworm) in us-east-1
+}
+
+variable "instance_type" {
+  default = "t2.micro"
+}
+
+variable "key_name" {
+  description = "Enter a key pair"
+}
+*************************************************************************************************************
+http://192.168.1.25/ITIM/DEvops_tools_imp.txt
+
+
+Slack
+Jenkins
+Docker
+github
+kubernetes
+LXC
+Ansible
+Trello
+SAP
+Sharepoint
+Openstack
+Terraform
+CHEF
+Splunk
+Nagios
+Tenable
+bmc
+VERACODE
+Selanium
+Cucumber
+JUnit
+Maven
+UpGuard
+ELK 
+Servicenow
+
+
+
+
+
+
+ITIM
+http://192.168.1.25/COSA/Configure%20These%20Group%20Policies.txt
+
+
+Configure These Group Policies
+
+| #  | Category | Group Policy Setting | Configuration |
+|----|-----------|------------------------|----------------|
+| 1  | Password Policy | Minimum password length | 12 characters |
+| 2  | Password Policy | Enforce password history | 24 passwords remembered |
+| 3  | Password Policy | Maximum password age | 30 days |
+| 4  | Account Lockout | Lockout threshold | 5 invalid attempts |
+| 5  | Account Lockout | Lockout duration | 15 minutes |
+| 6  | Account Lockout | Reset account lockout counter | After 15 minutes |
+| 7  | Security Options | Do not display last username | Enabled |
+| 8  | Windows Update | Configure Automatic Updates | Notify for download |
+| 9  | Start Menu | Remove Run from Start Menu | Enabled |
+| 10 | Start Menu | Remove All Programs list from Start Menu | Enabled |
+| 11 | Control Panel | Prohibit access to Control Panel | Enabled |
+| 12 | System | Prevent access to command prompt | Enabled |
+| 13 | System | Disable Task Manager | Enabled |
+| 14 | Administrative Templates | Hide specified drives | Hide C: drive |
+| 15 | Internet Explorer | Disable changing homepage settings | Enabled |
+| 16 | Windows Defender | Turn off real-time protection | Enabled (for tinku only) |
+| 17 | Desktop | Hide all icons on desktop | Enabled |
+| 18 | Power Management | Require password on wakeup | Enabled |
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+http://192.168.1.25/COSA/DHCP%20Powershell.txt
+
+
+# Step 1: Install DHCP Server role
+Install-WindowsFeature -Name DHCP -IncludeManagementTools
+
+# Step 2: Authorize DHCP Server (if domain joined)
+Add-DhcpServerInDC -DnsName "YourServerName.YourDomain.com" -IPAddress "YourServerIPAddress"
+
+# Step 3: Create DHCP Scope
+Add-DhcpServerv4Scope -Name "MyScope" -StartRange 192.168.100.51 -EndRange 192.168.100.75 -SubnetMask 255.255.255.0 -State Active
+
+# Step 4: Set Default Gateway
+Set-DhcpServerv4OptionValue -ScopeId 192.168.100.0 -Router 192.168.100.1
+
+# Step 5: Set DNS Servers and Domain Name
+Set-DhcpServerv4OptionValue -ScopeId 192.168.100.0 -DnsServer 192.168.100.100,192.168.100.200 -DnsDomain "yourdomain.local"
+
+# Step 6: Verify Configuration
+Get-DhcpServerv4Scope
+Get-DhcpServerv4OptionValue -ScopeId 192.168.100.0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+http://192.168.1.25/COSA/FILES/Hello%20to%20Script.txt
+
+1. Write a script to find the number of unique elements in list and print the list.
+2. Write a script to reverse the list elements
+3. Write a script to find sum of numbers in list
+4. Write a script to find the largest and smallest number in the list 
+5. Write a script to print all even numbers in a list.
+6. Write a script to print all odd numbers in a list.
+7. Write a script to remove common elements from two list in 
+8. Write a script to print multiplication table of a given number
+9. Count the total number of digits in a number
+10. Use else block to display a message â€œDoneâ€ after successful execution of for loop
+11. Write a script to display all prime numbers within a range
+12. Display Fibonacci series up to 10 terms
+13. Reverse a given integer number
+14. Write a  script to find those numbers which are divisible by 7 and multiple of 5, between 100 and 1000 (both included).
+15. Write a  script to convert temperatures to and from celsius, fahrenheit
+16. Write a  script that prints all the numbers from 0 to 6 except 3 and 6.
+Note : Use 'continue' statement.
+
+17. Write a script to display "Hello" if a number entered by user is a multiple of five , 
+otherwise print "Bye".
+18. Write a script to check whether an years is leap year or not
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+http://192.168.1.25/COSA/FILES/Let's%20Begin.txt
+
+1. Find the html tags that are more than 4 letters.
+
+Html tags can be found inside <> characters and closing html tags can be found in the same format after / character. </>
+
+2. Loop through the list and apply regex to each element so that only items ending with semicolon (;) are matched.
+
+3. Find the words with exactly 8 letters
+
+4. Write a  script to identify Mobile number from the text
+
+5. Write a script to identify unique MAC addresses from the file.
+
+6. Write a script to identify unique IP addresses from Webserver access log
+
+7. Write a script to identify the unique attacks from Snort logs
+
+8. Write a script to identify the packets of ICMP from packet tracer file.
+
+9. Write a script to take input from user for pattern and string and give the output back to the user.
+
+10. Identify all the unique special characters and count them which are used in the files.
+
+
+https://docs.google.com/document/d/1JgeoDZ7ElJtzistPhRLATb23wT9qQrEtwMdm50afEB4/edit?tab=t.ugrsl42gf3su
+
+VirtualBox
+Internal Network - 192.168.100.0/25
+
+Machine1 -> Main Server (PARAM)  - 6GB RAM 
+					Windows Server 2022
+					Server Name - PARAM
+					Server IP - 192.168.100.100
+					Disk - 2 ( 50GB each)
+					Disk -1 Partitions C & D
+							Inside D -> Create separate folders for the users.						
+					AD DS (Domain - cdac.local)
+					Users 
+							u1 
+							u2
+							u3
+					DHCP
+					MEMBER_SERVER - 1                                                                                                                      					(win10)
+					WDS (Win10)
+					FSRM
+					Apply limit of 200MB Data storage on u1,u2,u3
+					Don't allow u1 and u2 to copy images in their folders
+					WSB
+					Setup the scheduled backup everyday morning and evening 7:00 (Dedicated Disk-2)
+					IIS
+						Display "Welcome to CDAC"
+					setup the FTP server on ftp.cdac.local
+					On the D: Drive apply the Data Deduplication
+		
+******		Create a shared folder "PUB_SERVER" on D: 
+
+Machine2 -> Member Server (Shavak) - 4GB RAM 
+					Windows Server 2022
+					Server Name - Shavak						
+					Server IP - 192.168.100.101
+					Join the server to the domain ->
+		*****			And make it an additional Domain Controller
+		*****			Create a shared Folder "PUB_MEMBER" on D:					
+		*****			Make sure that both the folders are accessible over network using the same path
+						[ \\PARAM\PUBLIC ]
+
+Machine3 -> Win10 Machine (Client) - 2 GB RAM
+					Win 10
+					Computer Name - Client
+					Domain - cdac.local
+					IP - Automatic DHCP
+	
+					Login u1
+					Don't Login the u2 and u3 
+		****			
+					Now turn off the Server (PARAM)
+	 					and u2 and u3 should be able to Login from
+							Additional Domain controller
+							
+					Try to access the website on cdac.local
+
+Machine 4 -> Windows Server (Exchange Server)
+					Win 2022
+					Computer Name - MailServer
+					IP - 192.168.100.102
+					It should work on the domain name -> mail.cdac.local	(from all the machines)
+					
+					
+VPN
+Policies					
+
+
+http://192.168.1.25/COSA/Linux_DNS/First_Task.txt
+
+
+
+Debian Server
+	192.168.  50+xx  .50
+
+	yourname.com
+		"Your Intro on the index.html"
+
+Win11 Client
+	visit
+	yourname.com
+		It should show your intro there.
+
+
+
+
+http://192.168.1.25/COSA/Linux_DNS/prerequisite.txt
+
+DNS server - Linux
+
+
+2 Machines
+1. Server - Debian 
+	Internal -> 192.168.25.100/24
+	Putty -> Host Only -> 
+	Internet -> NAT Network
+	SSH 
+	apache2
+
+[apt update, ssh install, interfaces file ] 
+
+
+
+
+
+1. Client - win 11
+	Internal 
+	Static IP
+	Browse the website of Server through IP
+
+
+
+
+http://192.168.1.25/COSA/NIS_SETUP.txt
+
+#NIS  (Network Information Service) Server
+#Server   (rpcbind - 111)
+
+
+sudo apt update 
+sudo apt install nis rpcbind -y
+sudo ypdomainname ditiss
+
+
+----Open /etc/yp.conf ---
+
+domain ditiss server localhost
+
+----create file ---
+nano /etc/defaultdomain
+ditiss
+
+
+--configure NIS server ---
+sudo nano /etc/ypserv.securenets
+
+255.255.255.0   192.168.100.0
+
+
+
+---- enable and restart rpcbind and ypserv ------
+sudo systemctl enable rpcbind ypserv
+sudo systemctl start rpcbind ypserv
+
+
+
+----build NIS Map---------
+sudo /usr/lib/yp/ypinit -m
+
+in NISDomain name => ditiss
+NIS server hostnames -> hosts IP and names
+
+
+-----verify status
+sudo systemctl status ypserv
+rpcinfo -p
+ypcat passwd
+
+==================================================================
+==================================================================
+======================CLIENT SIDE=================================
+==================================================================
+==================================================================
+/etc/hosts -> Server entry
+systemctl restart networking
+ping hostname_server
+
+
+
+sudo apt update
+sudo apt install nis rpcbind -y
+sudo ypdomainname ditiss
+sudo nano /etc/defaultdomain
+"ditiss"
+
+sudo nano /etc/yp.con
+domain ditiss server $SERVER_IP
+
+
+sudo nano /etc/nsswitch.conf
+passwd: compat systemd nis
+group: compat systemd nis
+shadow: compat nis
+
+sudo systemctl enable rpcbind systemctl 
+sudo systemctl start rpcbind systemctl 
+
+systemctl status rpcbind
+
+ypwhich
+ypcat passwd
+
+
+TEST Login
+su - USERNAME
+
+server -> sudo adduser username
+cd /var/yp   -> sudo make
+
+in case if you want to create a home directory for client you can do that either manually or you can setup the NFS to mount the home directory of user.
+http://192.168.1.25/COSA/TASK.txt
+
+TASK
+
+1. Restore the machine to fresh machine.
+2. you will add the group dhadkan, sholey, idiots
+3. you will add members to the group
+	where dev,rahul, Anjali, these will be having primary group - dhadkan
+	
+	gabbar, jay , veeru , kaliya -> sholey
+
+	virus, Farhan, raju -> idiots
+
+Total -> iacsd, dev,rahul, Anjali, gabbar, jay , veeru , kaliya, virus, Farhan, raju, root
+
+
+gabbar -> sudo group 
+
+
+
+
+
+																					
+
+
+192.168.1.25 - /COSA/Tasks/
+http://192.168.1.25/COSA/Tasks/30032025_1.txt
+
+30/03/2025
+Network Sharing
+Task - 1
+	Create a folder (share) ->  3rd Drive
+	you will create two different folders
+		share_read   - Everyone - Read
+		share_write  - Everyone - Write
+		To access it
+		Run -> \\IP
+		Run -> \\HOSTNAME
+
+If you have shared something from your computer,
+then you can check it from the command prompt.
+
+'net share'
+
+
+http://192.168.1.25/COSA/Tasks/30032025_2.txt
+
+Task - 2
+
+In your windows server open the disk management
+and from C: shrink a new volume of 20GB
+
+	Create a partition and use it as D:
+
+
+http://192.168.1.25/COSA/Tasks/30032025_3.txt
+
+Task - 3
+
+WSB
+
+configure the Windows Server Backup
+
+Backup should be scheduled at 1:00AM and 1:00PM Everyday.
+
+Configure the Full Backup on dedicated disk for Backup.
+
+
+http://192.168.1.25/COSA/Tasks/30032025_4.txt
+
+Task - 4
+================
+IIS
+
+Install and configure the IIS 
+
+on the Default Page -> Print your Name
+
+
+
+http://192.168.1.25/COSA/Tasks/30032025_5.txt
+
+Task - 5
+
+DHCP
+
+Setup a static ip of the server as
+
+192.168.1xx.100
+
+Create a scope with the range
+192.168.1xx.30 - 192.168.1xx.50
+
+Make sure client is getting the IP from the same range.
+
+
+http://192.168.1.25/COSA/Tasks/30032025_6_Linux.txt
+
+Task - 1 
+root user password reset
+
+Task -2 
+install any redhat OS and run any webserver on the same.
+
+
+
+
+http://192.168.1.25/COSA/Tasks/30032025_7_DNS.txt
+
+DNS TASK
+
+1. Windows Server (Static -> 172.25.100.10/16)
+	IIS -> GOOD NIGHT ..!!
+	DHCP -> 172.25.100.100 - 172.25.200.200
+		DNS -> 172.25.100.10
+
+	Windows client (11)
+		IP => DHCP, DNS
+		Website -> goodnight.com
+			-> goodmorning.com
+	
+
+2. Debian (Apache2)
+	goodmorning.com
+	GOOD MORNING...!!
+
+
+
+http://192.168.1.25/COSA/Tasks/demo.txt
+
+THIS IS MY DEMO FILE ON DEB2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+http://192.168.1.25/COSA/Windows%20Server%20Installation%20Task.txt
+
+Windows Server Installation Task
+VirtualBox -> Poweroff All your Debian Machines.
+
+
+Inside the VBox
+Install 
+1. Windows Server 2025 -> 4GB Memory, 100GB HDD
+
+	Editions -> Windows Server 2025 Datacentre (Desktop Experience)
+	Password - Admin@123
+
+
+Server
+Member
+
+2. Install windows 11.
+
+
+http://192.168.1.25/COSA/WinServer.txt
+
+Windows Server 2025
+	Datacentre Evaluation
+
+Server Manager, Notification Centre, Local Server
+1. How to set the device name or Server Name.
+2. How to set the Private IP address.
+
+
+2 VMs (1 as a server another as a client)
+
+	1 Server , 1 Client
+	SERVER		Win11
+	8 GB		4GB
+
+
+Server - 192.168.100.100/24
+Network - 192.168.100.0/24
+	192.168.100.0 - 192.168.100.255
+
+
+Windows -> Restore Point
+
+Server Setup -> WSB (Windows Server Backup)
+	WSB 
+		1. Network		(task-1)
+		2. Hard Disk (Dedicated for Backup only)
+			1. 100GB (Existing)
+			2. So add another one with 100GB
+	Automatically - schedule
+	Manually
+		
+	Run - diskmgmt.msc	(Disk Management Open)
+	(TASK-2)
+
+	Roles     - Services for others
+	Features  - server (Feature)
+
+
+WSB - feature Install
+	Configure the backup
+
+TASK - 3
+
+==========================================
+Service
+
+WebServer -> IIS
+
+Task - 4
+
+==========================
+DHCP
+Task - 5
+
+
+
+*************************************************************************************************************
+
+Compliance
+http://192.168.1.25/Compliance_Audit/1_Compliance_Audit_Introduction.txt
+
+Compliance Audit
+
+There are two words 
+
+1. Compliance
+2. Audit. 
+
+
+1. Compliance
+
+The word Compliance is derived from the Latin word "Complere"
+which means (having all parts or elements; lacking nothing)
+
+The word complete is also derived from the same word "Complere"
+
+Compliance consists of being amenable (happy to accept Something), being obedient(Aagnakari) to the other party, and fully meeting demands.
+
+ 
+In a legal context, this means to obey legal orders and fully realize the rule of law
+
+Rule of Law (The law is applied equally and fairly)
+
+
+
+
+
+No one is above the law. (Even the king is bind to the law)
+Law is KING. ..
+
+
+
+
+
+
+
+
+
+
+2. Audit
+
+
+- An audit involves being independent.
+- Audits are impartial and intended to look at what the organisation has done and make sure that itâ€(tm)s in line with what they said they did.
+
+
+
+
+
+
+- Effectively an audit function monitors and evaluates how effectively and efficiently the business has met its own internal control policies, processes and procedures.
+
+
+
+
+- It ensures that the policies, processes and procedures of the business are being followed correctly and identifies opportunities for the business to manage its risks.
+
+- Essentially, the audit function gives the business assurance that its intentions are being followed through.
+
+
+-A key part of auditâ€(tm)s role is looking back at what the organisation has done and identifying where this may need to change in the future.
+
+
+
+Compliance vs Audit
+
+
+While compliance and audit are like two sides of the same coin, they play very different roles. 
+
+While audit may monitor what the organisation is doing and find deficiencies in a companyâ€(tm)s policies, processes and procedures, it may not identify whether the organisation has actually complied with its legal obligations. 
+
+However, compliance will look at a policy, process and procedure from the lens of regulatory compliance. Does it meet legal obligations? Are laws being followed? Can the organisation meet its regulatory obligations?
+
+Manufacturing Packaged Food. (ABC Pvt Ltd)
+(Chips, Salted Namkeens) -> Food -> License ->
+Export -> Rules & Regulations. .???
+
+
+
+
+
+Security Audit
+
+A security audit is a systematic evaluation of the security of a company's information system by measuring how well it conforms to an established set of criteria
+
+
+
+1. Risk Assessment - Analysing the risks and solving them (Risk Prevention)......Technology overview, Control Policies, Identify gap area of risks. 
+
+
+Assess-> Identify, priorities. (System Audit. ..!!, Resources ..Server (critical)
+
+
+2. Vulnerability Assessment - Business touch. weakness. prove...?? ,  weakness prevent. .. Security weakness review. ...
+
+Systematic review of a security weakness in an information system/any system and give remedies accordingly.
+
+
+3. Penetration Testing - test of Penetration 1 Person Detect weaknesses..
+
+Hacker type. ..(hacking Detect), Black Box, White Box, Gray Box Testing. .!!!
+
+
+Experts-> Attempt -> System Security Breach ..-> Potential Loopholes
+
+
+
+4. Compliance Audit - review -> guidelines -> proper/improper -> security polices check inside organization
+
+process, procedures -> Government laws -> legal or illegal...
+
+
+Company Rules -> Government rules (Defined, follow)
+*************************************************************************************************************
+
+
+http://192.168.1.25/Compliance_Audit/2_Introduction_to_Audit.txt
+
+Types of Audits
+Audits of Financial statements
+Operational  Audit (Performance Audit)
+Compliance Audit
+
+IT Security Audit Phases
+1. Define the Objectives
+2. Plan the Audit
+3. Perform the Auditing Work
+4. Report the results
+5. Take necessary actions
+
+
+Principles of Audit
+1. Integrity
+2. Fair Presentation
+3. Due Professional Care
+4. Confidentiality
+5. Independence
+6. Evidence Based Approach
+7. Risk Based Approach
+*************************************************************************************************************
+
+http://192.168.1.25/Compliance_Audit/GDPR_Brief.txt
+
+GDPR (April - 2016) Was announced in 2012
+
+DPD (Data Protection Directive - Oct 1995)
+
+The GDPR's primary aim is to enhance individuals' control and rights over their personal data and to simplify the regulatory environment for international business.
+
+
+Who does GDPR apply to?
+
+GDPR applies to any organisation operating within the EU, as well as any organisations outside of the EU which offer goods or services to customers or businesses in the EU.
+
+*************************************************************************************************************
+
+
+
+http://192.168.1.25/Compliance_Audit/LINKS_GDPR_PDPB.txt
+
+
+https://blog.privacyengine.io/article/176/destination-gdpr-how-did-we-arrive-here-0
+
+https://eurocloud.org/news/article/a-brief-history-of-data-protection-how-did-it-all-start/
+
+
+https://gdpr-info.eu/art-98-gdpr/
+
+https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX:32016R0679
+
+https://www.zdnet.com/article/gdpr-an-executive-guide-to-what-you-need-to-know/
+
+https://www.meity.gov.in/writereaddata/files/Personal_Data_Protection_Bill,2018.pdf
+
+
+*************************************************************************************************************
+FORENSICS
+http://192.168.1.25/CF/kali_sha256sum.txt
+
+
+aeca4f8fd7f58eda290812f538e1323d3ba1f1a34df4b203e85de4be42525bb6
+
+sha256 - kali 2024.4
+
+
+
+http://192.168.1.25/mailserver.txt
+
+
+sudo apt update && sudo apt upgrade -y
+sudo hostnamectl set-hostname mail.iacsd.com
+
+
+edit hosts file
+127.0.0.1   localhost
+127.0.1.1   mail.iacsd.com mail
+
+
+sudo apt install postfix dovecot-imapd dovecot-pop3d mailutils -y
+
+sudo adduser tinku
+
+
+sudo apt install 
+
+echo "Hello from Postfix" | mail -s "Test Email" tinku
+
+
+
+su tinku
+
+mail
+
+
+sudo systemctl restart postfix dovecot
+
+
+
+
+Access Mail from an Email Client (like Thunderbird)
+Server Type: IMAP
+
+Incoming Server: mail.iacsd.com, Port: 143
+
+Outgoing Server (SMTP): mail.iacsd.com, Port: 25
+
+Username: tinku
+
+Password: password you set
+
+Encryption: None (for now)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+K8
+http://192.168.1.25/k8/kubernetes_script.txt
+
+master & node
+-------------------
+
+sudo apt-get update
+sudo apt-get upgrade -y
+sudo apt-get install docker.io -y
+sudo apt-get install -y apt-transport-https ca-certificates curl gpg
+
+
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+
+sudo apt-get update
+sudo apt-get install -y kubelet kubeadm kubectl
+sudo apt-mark hold kubelet kubeadm kubectl
+
+-----------------sudo nano /etc/hosts    ENTER ENTRIES FOR BOTH THE MACHIENS----------------------------------------------------------
+
+==============================================================================
+Now on MASTER
+
+sudo kubeadm init --apiserver-advertise-address=$IP --pod-network-cidr=192.168.100.0/24
+
+
+mkdir -p $HOME/.kube 
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+kubectl get nodes
+
+
+Copy Join in node with using sudo
+
+
+kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/tigera-operator.yaml
+
+kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/custom-resources.yaml
+
+watch kubectl get pods -n calico-system
+
+
+CALICO / FLANNEL
+
+
+
+
+After successful running
+
+create the yaml files and run the below commands.
+
+kubectl apply -f nginx-deployment.yaml
+kubectl apply -f nginx-service.yaml
+
+
+
+
+
+http://192.168.1.25/k8/nginx-deployment.yaml.txt
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest  # Replace with your custom image if necessary
+        ports:
+        - containerPort: 80
+
+
+
+
+
+
+
+http://192.168.1.25/k8/nginx-service.yaml.txt
+
+
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  selector:
+    app: nginx
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer  # Or use ClusterIP if you don't need external access
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
